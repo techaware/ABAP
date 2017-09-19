@@ -1,0 +1,98 @@
+*&---------------------------------------------------------------------*
+*& Report ZRAH_1
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+report zrah_1.
+
+* a string service class
+class lcl_string_srv definition.
+  public section.
+    class-methods:
+      print         importing          s type string.
+
+  private section.
+    class-methods:
+      get_last_char importing s        type string
+                    returning value(c) type char1,
+      get_rem_string importing s                 type string
+                     returning value(rem_string) type string,
+      permute       importing s         type string
+                    returning value(st) type string_table,
+      get_perm      importing s         type string
+                              c         type char1
+                    returning value(st) type string_table.
+endclass.
+
+class lcl_string_srv implementation.
+
+* Print all the permutations of an input string
+  method print.
+    cl_demo_output=>display( permute( s ) ).
+  endmethod.
+
+* get last character of a string
+  method get_last_char.
+    data(i) = strlen( s ).
+    i = i - 1.
+    c = s+i.
+  endmethod.
+
+* get string exluding last
+  method get_rem_string.
+    data(i) = strlen( s ).
+    i = i  - 1.
+    rem_string = s(i).
+  endmethod.
+
+* do Permutations over the string characters
+* This is a recusive method that class itself with remaining string
+  method permute.
+    data: t_all_perm type string_table.
+
+    data(last_char) = get_last_char( s ).
+    data(rem_string) = get_rem_string( s ).
+
+    if strlen( rem_string ) gt 1.
+* recursively call until one char left
+      data(stable) = permute( s = rem_string ).
+    else.
+      append rem_string to stable.
+    endif.
+
+* place last char at all position of rem_string
+    loop at stable into data(lwa).
+      data(t_perm) = get_perm( s = lwa
+                                 c = last_char ).
+      append lines of t_perm to t_all_perm.
+    endloop.
+*  return current set of permutation
+    st = t_all_perm.
+
+  endmethod.
+
+* Place last char at all postion of the string
+* s = AB & c = C then - st = [ABC, ACB, CAB]
+  method get_perm.
+
+    data(i) = strlen( s ).
+
+    while i ge 0.
+      data(l) = s(i).
+      data(r) = s+i.
+      data(perm) = l && c && r.
+      append perm to st.
+
+      i = i - 1.
+    endwhile.
+
+  endmethod.
+
+endclass.
+
+* Input a string whose permutations has to be printed.
+parameters: s type string.
+
+start-of-selection.
+
+  lcl_string_srv=>print( s ).
