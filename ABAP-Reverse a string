@@ -1,0 +1,36 @@
+function zrah_string_reverse.
+*"----------------------------------------------------------------------
+*"*"Local Interface:
+*"  CHANGING
+*"     VALUE(S)
+*"----------------------------------------------------------------------
+
+  field-symbols: <e> type any,
+                 <s> type any.
+  data: t type c.
+
+  data(l) = strlen( s ).
+* decrementing index
+  l = l - 1.
+* incrementing index
+  data(b) = 0.
+
+* repeat until incrementing index is less that decrementing index
+  while b < l.
+* first char
+    assign s+b(1) to <s> casting type c.
+* last char
+    assign s+l(1) to <e> casting type c.
+
+*   Swap first and last
+    t   = <e>.
+    <e> = <s>.
+    <s> = t.
+
+*   update index
+    b = b + 1.
+    l = l - 1.
+
+  endwhile.
+
+endfunction.
