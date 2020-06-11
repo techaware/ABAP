@@ -1,0 +1,145 @@
+class merge_sort definition.
+
+  public section.
+    types: int_table type standard table of i with default key.
+
+    methods:
+      sort importing elements type int_table
+            returning value(sorted_elements) type int_table,
+
+       native_sort importing elements type int_table
+                 returning value(sorted_elements) type int_table.
+
+   private section.
+     methods:
+       split_merge importing elements type int_table
+                  returning value(sorted_elements) type int_table,
+       get_left importing elements type int_table
+                 returning value(left_elements) type int_table,
+       get_right importing elements type int_table
+                 returning value(right_elements) type int_table.
+
+
+endclass.
+
+class merge_sort implementation.
+
+  method sort.
+    " main method table takes a table of integers and return sorted table of intergers
+
+
+    sorted_elements = split_merge( exporting elements = elements ).
+
+  endmethod.
+
+  method split_merge.
+
+   " we will be using recursive call to split until only one element is left. Then work backwork to merge by comparing the head of the table
+
+   if lines( elements ) > 1.
+     data(elements_left) = get_left( elements ).
+     data(elements_right) = get_right( elements ).
+   endif.
+
+   if lines( elements_left ) > 1.
+     data(sorted_elements_left) = split_merge( exporting elements = elements_left ).
+   else.
+     sorted_elements_left = elements_left.
+   endif.
+
+   if lines( elements_right ) > 1.
+     data(sorted_elements_right) = split_merge( exporting elements = elements_right ).
+   else.
+     sorted_elements_right = elements_right.
+   endif.
+
+   " merge sorted_elements_left and sorted_elements_right
+   data(left_index) = 1.
+   data(right_index) = 1.
+   data(merged_index) = 1.
+
+   while left_index LE lines( sorted_elements_left ) and right_index LE lines( sorted_elements_right ).
+     if sorted_elements_left[ left_index ] < sorted_elements_right[ right_index ].
+       append initial line to sorted_elements assigning field-symbol(<element>).
+       <element> = sorted_elements_left[ left_index ].
+       left_index = left_index + 1.
+     else.
+       append initial line to sorted_elements assigning <element>.
+       <element> = sorted_elements_right[ right_index ].
+       right_index = right_index + 1.
+     endif.
+   endwhile.
+
+   " append remaining elements of left or right to the end
+   while left_index LE lines( sorted_elements_left ).
+       append initial line to sorted_elements assigning <element>.
+       <element> = sorted_elements_left[ left_index ].
+       left_index = left_index + 1.
+   endwhile.
+
+   while right_index LE lines( sorted_elements_right ).
+       append initial line to sorted_elements assigning <element>.
+       <element> = sorted_elements_right[ right_index ].
+       right_index = right_index + 1.
+   endwhile.
+
+  endmethod.
+
+  method get_left.
+    data(midpoint) = lines( elements ) / 2.
+    data(counter) = 1.
+    while counter LE midpoint.
+      append initial line to left_elements assigning field-symbol(<element>).
+      if <element> is assigned.
+        <element> = elements[ counter ].
+      endif.
+      counter = counter + 1.
+    endwhile.
+  endmethod.
+
+  method get_right.
+      data(midpoint) = lines( elements ) / 2.
+    data(counter) = midpoint + 1.
+    while counter LE lines( elements ).
+      append initial line to right_elements assigning field-symbol(<element>).
+      if <element> is assigned.
+        <element> = elements[ counter ].
+      endif.
+      counter = counter + 1.
+    endwhile.
+  endmethod.
+
+  method native_sort.
+    sorted_elements = elements.
+    sort sorted_elements.
+  endmethod.
+
+endclass.
+
+class test_merge_sort definition for testing risk level harmless duration short.
+  public section.
+    methods:
+      sort for testing.
+endclass.
+
+class test_merge_sort implementation.
+  method sort.
+    data: elements type merge_sort=>int_table,
+          elements_expected type merge_sort=>int_table.
+
+    data(random) = cl_abap_random=>create( cl_abap_random=>seed( ) ).
+    random->INTINRANGE( low = 1
+                        high = 10000 ).
+    elements = value #( for i = 1 then i + 1 until i = 100000
+                        ( random->INTINRANGE( low = 1 high = 1000000 ) ) ).
+
+    data(merge_sort) =  new merge_sort( ).
+    data(sorted_elements) = merge_sort->sort( elements ).
+
+    elements_expected = merge_sort->native_sort( elements ).
+
+    cl_abap_unit_assert=>assert_equals( act = sorted_elements
+                                        exp = elements_expected
+                                        msg = 'Success' ).
+  endmethod.
+endclass.
