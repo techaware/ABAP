@@ -1,0 +1,107 @@
+* define a local class for bubble sort
+class cl_bubble definition
+  final create public.
+
+  public section.
+    types: ty_elements type standard table of i with default key.
+    methods:
+      sort changing elements type ty_elements.
+endclass.
+
+class cl_bubble implementation.
+
+  method sort.
+    " sample [2,3,1]
+    " [2,3,1]
+    " [2,1,3]
+    " [1,2,3]
+
+    " main loop for comparator element
+    data(row_count) = lines( elements ).
+
+    do ( row_count - 1 ) times.
+      data(iteration) = sy-index.
+      loop at elements assigning field-symbol(<fs_ele>).
+        if sy-tabix LE ( row_count - iteration ) .
+          if <fs_ele> > elements[ sy-tabix + 1 ]. "Comparison
+          " switch element
+            data(temp) = <fs_ele>.
+            <fs_ele> = elements[ sy-tabix + 1 ].
+            elements[ sy-tabix + 1 ] = temp.
+          endif.
+        else.
+        " row_count - 1 reached
+          exit.
+        endif.
+      endloop.
+    enddo.
+  endmethod.
+
+endclass.
+
+* test class
+
+class test_bubble definition for testing Risk Level Harmless Duration Short.
+
+  public section.
+    methods:
+      test_sort for testing,
+      test_sort_1 for testing,
+      test_sort_2 for testing,
+      test_sort_0 for testing.
+endclass.
+
+class test_bubble implementation.
+  method test_sort.
+    data: bubble_cut type ref to cl_bubble.
+
+    data(elements) =  value cl_bubble=>ty_elements( ( 10 ) ( 5 ) ( 1 ) ).
+    data(elements_exp) =  value cl_bubble=>ty_elements( ( 1 ) ( 5 ) ( 10 ) ).
+
+    new cl_bubble( )->sort( changing elements = elements ).
+
+    cl_abap_unit_assert=>assert_equals( act = elements
+                                      exp = elements_exp
+                                      msg = 'Sorted correctly').
+  endmethod.
+
+  method test_sort_1.
+    data: bubble_cut type ref to cl_bubble.
+
+    data(elements) =  value cl_bubble=>ty_elements( ( 10 ) ).
+    data(elements_exp) =  value cl_bubble=>ty_elements( ( 10 ) ).
+
+    new cl_bubble( )->sort( changing elements = elements ).
+
+    cl_abap_unit_assert=>assert_equals( act = elements
+                                      exp = elements_exp
+                                      msg = 'Sorted correctly').
+ endmethod.
+
+ method test_sort_2.
+    data: bubble_cut type ref to cl_bubble.
+
+    data(elements) =  value cl_bubble=>ty_elements( ( 10 ) ( 5 ) ).
+    data(elements_exp) =  value cl_bubble=>ty_elements( ( 5 ) ( 10 ) ).
+
+    new cl_bubble( )->sort( changing elements = elements ).
+
+    cl_abap_unit_assert=>assert_equals( act = elements
+                                      exp = elements_exp
+                                      msg = 'Sorted correctly').
+ endmethod.
+
+    method test_sort_0.
+    data: bubble_cut type ref to cl_bubble.
+
+    data(elements) =  value cl_bubble=>ty_elements(  ).
+    data(elements_exp) =  value cl_bubble=>ty_elements(  ).
+
+    new cl_bubble( )->sort( changing elements = elements ).
+
+    cl_abap_unit_assert=>assert_equals( act = elements
+                                      exp = elements_exp
+                                      msg = 'Sorted correctly').
+ endmethod.
+
+endclass.
